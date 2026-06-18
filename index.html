@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#7c5cbf" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Melissa" />
+  <title>Melissa — Coach</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <main id="view" class="view"></main>
+    <nav id="tabbar" class="tabbar" hidden>
+      <button class="tab" data-route="today" aria-label="Today">
+        <span class="tab-ico">☀️</span><span class="tab-lbl">Today</span>
+      </button>
+      <button class="tab" data-route="train" aria-label="Train">
+        <span class="tab-ico">🏃‍♀️</span><span class="tab-lbl">Train</span>
+      </button>
+      <button class="tab" data-route="eat" aria-label="Eat">
+        <span class="tab-ico">🍳</span><span class="tab-lbl">Eat</span>
+      </button>
+      <button class="tab" data-route="log" aria-label="Log">
+        <span class="tab-ico">✓</span><span class="tab-lbl">Log</span>
+      </button>
+      <button class="tab" data-route="progress" aria-label="Progress">
+        <span class="tab-ico">📈</span><span class="tab-lbl">Progress</span>
+      </button>
+    </nav>
+  </div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

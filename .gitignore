@@ -1,0 +1,10 @@
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+desktop.ini
+*.log
+
+# Keep these on the PC only — never publish (personal detail / local hosting)
+PLAN.md
+*.bat
+.claude/
