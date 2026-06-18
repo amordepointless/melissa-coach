@@ -9,6 +9,7 @@ import { getPlan } from '../engine/nutrition-engine.js';
 import { mealById } from '../engine/nutrition-engine.js';
 import { isoWeek } from '../util.js';
 import { pageHeader, stat } from '../ui.js';
+import { APP_VERSION, BUILD_DATE } from '../version.js';
 
 export function renderToday(root, _arg, go) {
   const wpp = weeksPostpartum();
@@ -95,6 +96,9 @@ export function renderToday(root, _arg, go) {
     ...rec.reasons.map((r) => h('p', { style: 'margin:0 0 6px' }, r)),
     h('button.link-btn', { onclick: () => go('progress') }, 'See progress & review →'),
   ]));
+
+  // Inconspicuous version stamp — confirms she's on the latest build.
+  frag.appendChild(h('p.tiny.muted.center', { style: 'margin-top:20px;opacity:.55;font-size:.72rem' }, `v${APP_VERSION} · ${BUILD_DATE}`));
 
   root.appendChild(frag);
 }

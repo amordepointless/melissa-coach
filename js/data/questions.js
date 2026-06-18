@@ -88,8 +88,8 @@ export const ONBOARDING = [
   {
     key: 'logistics', title: 'Your week',
     fields: [
-      { id: 'equipment', type: 'multi', label: 'Equipment you have', value: ['bodyweight'],
-        options: [ ['bodyweight', 'Bodyweight only'], ['dumbbells', 'Dumbbells'], ['bands', 'Resistance bands'], ['kettlebell', 'Kettlebell'], ['treadmill', 'Treadmill'], ['stroller', 'Jogging stroller'], ['gym', 'Gym access'] ] },
+      { id: 'equipment', type: 'multi', label: 'Equipment you have', value: ['bodyweight', 'dumbbells', 'pullupbar', 'bench', 'vest', 'treadmill'],
+        options: [ ['bodyweight', 'Bodyweight'], ['dumbbells', 'Dumbbells'], ['bench', 'Bench'], ['pullupbar', 'Pull-up / dip bar (cage)'], ['vest', 'Weighted vest'], ['treadmill', 'Treadmill'], ['bands', 'Resistance bands'], ['kettlebell', 'Kettlebell'], ['stroller', 'Jogging stroller'], ['barbell', 'Barbell + plates'], ['gym', 'Gym access'] ] },
       { id: 'sessionLen', type: 'segmented', label: 'Realistic time per session', value: '20',
         options: [ ['15', '15 min'], ['20', '20–30 min'], ['40', '30–45 min'] ] },
       { id: 'sessionsPerWeek', type: 'segmented', label: 'Sessions per week', value: '3',
