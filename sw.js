@@ -1,5 +1,5 @@
 // sw.js — offline cache. Bump CACHE when you change app files.
-const CACHE = 'melissa-coach-v1';
+const CACHE = 'melissa-coach-v2';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest', './css/styles.css',
   './js/app.js', './js/store.js', './js/state.js', './js/util.js', './js/ui.js', './js/export.js',
