@@ -27,7 +27,7 @@ export function renderProgress(root, _arg, go) {
   if (ws.length >= 2) {
     const sm = smooth(ws.map((d) => d.weight), 3);
     const pts = ws.map((d, i) => ({ x: i, y: sm[i] }));
-    wcard.appendChild(lineChart(pts, { w: 320, h: 120, color: '#7c5cbf', fill: 'rgba(124,92,191,.10)' }));
+    wcard.appendChild(lineChart(pts, { w: 320, h: 120, color: '#c8910c', fill: 'rgba(247,189,18,.16)' }));
     wcard.appendChild(h('div.row.between.tiny.muted', {}, [ h('span', {}, `${ws[0].weight} lb`), h('span', {}, `${ws[ws.length - 1].weight} lb (smoothed)`) ]));
   } else {
     wcard.appendChild(h('p', {}, 'Log your weight weekly (Log → Week) and the trend line shows up here.'));
@@ -38,7 +38,7 @@ export function renderProgress(root, _arg, go) {
   const meas = store.read('measurements').filter((m) => m.waist != null);
   if (meas.length >= 2) {
     const pts = meas.map((m, i) => ({ x: i, y: m.waist }));
-    frag.appendChild(h('div.card', {}, [ h('h3', {}, 'Waist trend'), lineChart(pts, { w: 320, h: 100, color: '#e08a6b', fill: 'rgba(224,138,107,.10)' }), h('div.row.between.tiny.muted', {}, [ h('span', {}, `${meas[0].waist}"`), h('span', {}, `${meas[meas.length - 1].waist}"`) ]) ]));
+    frag.appendChild(h('div.card', {}, [ h('h3', {}, 'Waist trend'), lineChart(pts, { w: 320, h: 100, color: '#6f7682', fill: 'rgba(139,147,160,.14)' }), h('div.row.between.tiny.muted', {}, [ h('span', {}, `${meas[0].waist}"`), h('span', {}, `${meas[meas.length - 1].waist}"`) ]) ]));
   }
 
   // ---- Recent workouts ----

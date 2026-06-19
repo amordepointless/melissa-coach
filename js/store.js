@@ -14,9 +14,11 @@ const DEFAULTS = {
   weeklyLogs: {},           // 'YYYY-Www'  -> { weight, bleeding, symptoms{...}, note }
   measurements: [],         // [{ date, waist, hip, thigh, chest }]
   workouts: [],             // [{ date, type, distanceMi, durationMin, rpe, note }]
+  sessionLog: {},           // 'YYYY-MM-DD' -> { status:'done'|'skipped', title }
   meals: [],                // see data/meals.js shape
   mealPlan: {},             // 'YYYY-Www' -> { mon:{...}, ... }
   pantry: [],               // staples she says she keeps on hand (names, lowercased)
+  mealPrefs: { set: false, snacks: 2, prep: 'mix', variety: 'rotate', prepDay: 'Sun', times: {} },
   settings: { units: 'imperial' },
 };
 

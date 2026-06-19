@@ -74,6 +74,11 @@ export function mealFit(meal) {
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 export const DAY_LABELS = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun' };
 
+// The plan uses 5 eating occasions (two snacks) to fuel a nursing, active mom.
+export const PLAN_SLOTS = ['breakfast', 'lunch', 'dinner', 'snack', 'snack2'];
+export const PLAN_SLOT_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack', snack2: 'Second snack' };
+export const planMealType = (slot) => (slot === 'snack2' ? 'snack' : slot); // which meal category fills a plan slot
+
 export function getPlan(weekKey) {
   const plans = store.read('mealPlan');
   return plans[weekKey] || null;
@@ -90,22 +95,115 @@ export function clearPlanCell(weekKey, day, slot) {
   if (plans[weekKey] && plans[weekKey][day]) { delete plans[weekKey][day][slot]; store.write('mealPlan', plans); }
 }
 
-// Auto-fill a week by rotating her meals across days (snacks get 1 slot).
+// ---- Meal preferences (one-time, editable) ----
+export function getMealPrefs() {
+  const p = store.read('mealPrefs') || {};
+  return { set: false, snacks: 2, prep: 'mix', variety: 'rotate', prepDay: 'Sun', times: {}, ...p };
+}
+export function setMealPrefs(prefs) {
+  store.write('mealPrefs', { ...getMealPrefs(), ...prefs, set: true });
+}
+
+// Which eating occasions the plan uses, per her snack preference.
+export function activeSlots(prefs = getMealPrefs()) {
+  return prefs.snacks >= 2 ? PLAN_SLOTS : PLAN_SLOTS.filter((s) => s !== 'snack2');
+}
+
+// Candidate meals for a slot, biased by her prep style.
+function poolFor(slot, meals, prefs) {
+  const type = planMealType(slot);
+  let pool = meals.filter((m) => m.slot === type);
+  if (prefs.prep === 'batch') {
+    const pref = pool.filter((m) => (m.tags || []).some((t) => t === 'batch' || t === 'freezer'));
+    if (pref.length) pool = pref;
+  } else if (prefs.prep === 'quick') {
+    const pref = pool.filter((m) => (m.tags || []).some((t) => t === 'quick' || t === 'no-cook' || t === 'one-handed'));
+    if (pref.length) pool = pref;
+  }
+  return pool;
+}
+
+// Build a recommended week — a real plan that tells her what to eat, shaped by
+// her preferences (snacks, prep style, variety), leaning on cheap staples.
 export function autoFillPlan(weekKey) {
   const meals = allMeals();
-  const bySlot = {};
-  SLOTS.forEach((s) => { bySlot[s] = meals.filter((m) => m.slot === s); });
+  const prefs = getMealPrefs();
+  const slots = activeSlots(prefs);
   const plans = store.read('mealPlan');
   plans[weekKey] = {};
   DAYS.forEach((day, di) => {
     plans[weekKey][day] = {};
-    ['breakfast', 'lunch', 'dinner', 'snack'].forEach((slot) => {
-      const opts = bySlot[slot];
-      if (opts && opts.length) plans[weekKey][day][slot] = opts[di % opts.length].id;
+    slots.forEach((slot, si) => {
+      const pool = poolFor(slot, meals, prefs);
+      if (!pool.length) return;
+      const idx = prefs.variety === 'simple' ? (si % pool.length) : ((di + si) % pool.length);
+      plans[weekKey][day][slot] = pool[idx].id;
     });
   });
   store.write('mealPlan', plans);
   return plans[weekKey];
+}
+
+// Skip a recommendation: swap in a different meal of the same type for one slot.
+export function rerollMeal(weekKey, day, slot) {
+  let pool = poolFor(slot, allMeals(), getMealPrefs());
+  // if her prep filter leaves only one option, widen to all meals of this type
+  if (pool.length <= 1) pool = allMeals().filter((m) => m.slot === planMealType(slot));
+  if (!pool.length) return null;
+  const plan = getPlan(weekKey) || {};
+  const cur = plan[day] && plan[day][slot];
+  const curIdx = pool.findIndex((m) => m.id === cur);
+  let pick = pool[(curIdx + 1) % pool.length];
+  if (pool.length > 1 && pick.id === cur) pick = pool[(curIdx + 2) % pool.length];
+  setPlanCell(weekKey, day, slot, pick.id);
+  return pick;
+}
+
+// Return the existing plan, or generate one the first time so the app always
+// has something to recommend (it tells her what to eat, she can swap).
+export function ensurePlan(weekKey) {
+  const existing = getPlan(weekKey);
+  if (existing && Object.keys(existing).length) return existing;
+  return autoFillPlan(weekKey);
+}
+
+// Daily totals for a planned day, for showing the plan hits her targets.
+export function dayTotals(weekKey, day) {
+  const plan = getPlan(weekKey);
+  let kcal = 0, protein = 0;
+  if (plan && plan[day]) {
+    Object.values(plan[day]).forEach((id) => { const m = mealById(id); if (m) { kcal += m.kcal || 0; protein += m.protein || 0; } });
+  }
+  return { kcal, protein };
+}
+
+// ---- Batch-prep schedule from a week's plan ----
+// Looks at which meals repeat and suggests simple cook-ahead actions, so most
+// of the week is "open and eat." Kept deliberately low-effort.
+export function prepPlan(weekKey) {
+  const plan = getPlan(weekKey);
+  const counts = {};
+  if (plan) Object.values(plan).forEach((day) => Object.values(day).forEach((id) => { counts[id] = (counts[id] || 0) + 1; }));
+  const items = [];
+  const seen = new Set();
+  Object.entries(counts).forEach(([id, n]) => {
+    const m = mealById(id);
+    if (!m) return;
+    const tags = m.tags || [];
+    const batchy = tags.includes('batch') || tags.includes('freezer') || tags.includes('no-cook');
+    if (n >= 2 && batchy) {
+      let action;
+      if (/oat/i.test(m.name)) action = `Make ${n} jars of ${m.name} at once (5 min).`;
+      else if (/^hard-boiled eggs/i.test(m.name)) action = `Boil a dozen eggs for the week.`;
+      else if (tags.includes('freezer') || tags.includes('batch')) action = `Cook one big batch of ${m.name} — covers ${n} meals; fridge or freeze portions.`;
+      else action = `Prep ${m.name} ahead for ${n} servings.`;
+      if (seen.has(action)) return;
+      seen.add(action);
+      items.push({ id, name: m.name, n, action });
+    }
+  });
+  items.sort((a, b) => b.n - a.n);
+  return items;
 }
 
 // ---- Shopping list from a week's plan ----

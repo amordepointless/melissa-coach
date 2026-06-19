@@ -95,7 +95,7 @@ export function lineChart(points, opts = {}) {
   const sy = (y) => hh - pad - ((y - ymin) / (ymax - ymin || 1)) * (hh - 2 * pad);
 
   const d = points.map((p, i) => `${i ? 'L' : 'M'}${round(sx(+p.x), 1)},${round(sy(p.y), 1)}`).join(' ');
-  const color = opts.color || '#7c5cbf';
+  const color = opts.color || '#c8910c';
   if (opts.fill) {
     const area = document.createElementNS(ns, 'path');
     area.setAttribute('d', `${d} L${round(sx(xmax),1)},${hh - pad} L${round(sx(xmin),1)},${hh - pad} Z`);
